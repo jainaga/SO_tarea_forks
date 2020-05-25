@@ -95,6 +95,53 @@ int main(void){
 
     //aqui empieza el juego 
 
+    if (getpid() == pid_p){
+        while(1){
+            int opcion;
+            printf("Bienvenido a Golpéa el Topo\n\n\n");
+            printf("1.- A jugar\n");
+            printf("2.- Salir\n");
+            printf("Elige una opción del menú y enter para continuar\n");
+            scanf("%d", &opcion);
+            switch (opcion)
+            {
+            case 1:     //jugar al juego
+                while (1)
+                {
+                    printf("Elige un modo de juego\n");
+                    printf("1.- Dame el maso, los acabare\n");  //se le pide al jugador la posicion donde golpeara
+                    printf("2.- Modo rápido\n");                //se golpea de manera aleatoria en el tablero
+                    printf("3.- Volver\n");                     //se desea volver al menu principal
+                    printf("Elige un modo de juego y enter para continuar\n");
+                    scanf("%d", &opcion);
+                    if(opcion==1 || opcion==2){
+                        //juega, y se toma encuenta el modo de juego
+
+
+                        
+                    }
+                    else if(opcion == 3){   //vuelve al menu principal
+                        break;
+                    }
+                    else{
+                        printf("Ingresa un número válido\n\n\n");   //ingreso numero invalido, se mostrara nuevamente el menu de modo de juego
+                        sleep(2);
+                    }
+                }
+                
+                
+                break;
+            case 2:     //salir del juego 
+                exit(1);
+            
+            default:    //numero ingresado invalido, se vuelve a mostrar el menú
+                printf("Ingresa un número válido\n\n\n");
+                sleep(2);
+                break;
+            }
+
+        }
+    }
 
     return 0;
 }
