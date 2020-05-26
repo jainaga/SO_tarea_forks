@@ -24,6 +24,33 @@ void lectura_matriz_tiempos(int arreglo[5][5]){
         }
 }
 
+void mostrar_topos(int arreglo[5][5]){      //imprime la matriz de los topos 
+    int i, j;
+    char valores[5];
+    for (i=0;i<5;i++){  
+            for(j=0;j<5;j++){
+                if (arreglo[i][j]==0){
+                    valores[j] = '_';    //no topo
+                }
+                else{
+                    valores[j] = '^';      //topo
+                }
+            }
+        printf("[%c], [%c], [%c], [%c], [%c]\n", valores[0], valores[1], valores[2], valores[3], valores[4]);       //se imprime la fila de la matriz de los topos
+        }
+}
+
+void restar_vida_topos(int arreglo[5][5]){
+    int i, j;
+    for (i=0;i<5;i++){  
+        for(j=0;j<5;j++){
+            if(arreglo[i][j]>0){
+                arreglo[i][j] = arreglo[i][j] - 1;
+            }
+        }
+    }
+}
+
 int main(void){
     int p_h1[2], h1_h2[2], h2_h3[2], h3_p[2];       //pipes
     char buf[100];
@@ -89,6 +116,10 @@ int main(void){
     if (getpid() == pid_p){
         int arreglo_tiempos[5][5];      //arreglo de 5x5 que almacena el estado de cada celda del tablero con tiempos de cada topo 
         inicializacion_matriz_tiempos(arreglo_tiempos);
+        arreglo_tiempos[2][3] = 5;
+        lectura_matriz_tiempos(arreglo_tiempos);
+        mostrar_topos(arreglo_tiempos);
+        restar_vida_topos(arreglo_tiempos);
         lectura_matriz_tiempos(arreglo_tiempos);
     }
     printf("buena soy el proceso %d\n", getpid());
@@ -118,7 +149,16 @@ int main(void){
                         //juega, y se toma encuenta el modo de juego
 
 
-                        
+                        //aqui se comunica el padre con el hijo 1
+                        //padre espera a sus hijos hagan lo que tengan que hacer 
+                        //y le el mensaje del hijo 3
+
+                        //funcion descifrar_mensaje, este descifra el mensaje de hijo 3 y modifica la matriz
+
+                        //print de la matriz con topos 
+                        //se golpea
+                        //se resta uno a la matriz de tiempo 
+                        //vuelve todo a pasar 
                     }
                     else if(opcion == 3){   //vuelve al menu principal
                         break;
