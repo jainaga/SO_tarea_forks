@@ -27,17 +27,20 @@ void lectura_matriz_tiempos(int arreglo[5][5]){
 void mostrar_topos(int arreglo[5][5]){      //imprime la matriz de los topos 
     int i, j;
     char valores[5];
+    int cont_y = 0;
     for (i=0;i<5;i++){  
-            for(j=0;j<5;j++){
-                if (arreglo[i][j]==0){
-                    valores[j] = '_';    //no topo
-                }
-                else{
-                    valores[j] = '^';      //topo
-                }
+        for(j=0;j<5;j++){
+            if (arreglo[i][j]==0){
+                valores[j] = '_';    //no topo
             }
-        printf("[%c], [%c], [%c], [%c], [%c]\n", valores[0], valores[1], valores[2], valores[3], valores[4]);       //se imprime la fila de la matriz de los topos
+            else{
+                valores[j] = '^';      //topo
+            }
         }
+    printf("%d [%c], [%c], [%c], [%c], [%c]\n", cont_y, valores[0], valores[1], valores[2], valores[3], valores[4]);       //se imprime la fila de la matriz de los topos
+    cont_y += 1;
+    }
+    printf("   0    1    2    3    4 \n");
 }
 
 void restar_vida_topos(int arreglo[5][5]){
@@ -49,6 +52,10 @@ void restar_vida_topos(int arreglo[5][5]){
             }
         }
     }
+}
+
+void golpear_topo(int arreglo[5][5], int x, int y){
+    arreglo[y][x] = 0;
 }
 
 int main(void){
@@ -120,6 +127,9 @@ int main(void){
         lectura_matriz_tiempos(arreglo_tiempos);
         mostrar_topos(arreglo_tiempos);
         restar_vida_topos(arreglo_tiempos);
+        lectura_matriz_tiempos(arreglo_tiempos);
+        golpear_topo(arreglo_tiempos, 3, 2);
+        mostrar_topos(arreglo_tiempos);
         lectura_matriz_tiempos(arreglo_tiempos);
     }
     printf("buena soy el proceso %d\n", getpid());
