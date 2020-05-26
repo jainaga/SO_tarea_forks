@@ -3,6 +3,12 @@
 #include <stdio.h>
 
 
+typedef struct informacion_topos {      //estrucura que almacena la informacion de los nuevos topos
+    int cant_topos;                     //este será el mensaje que se enviarán los hijos y el tercero al padre
+    int tiempo_topos[3];
+    int coordenadas_topos[6];
+}informacion_topos;
+
 
 void inicializacion_matriz_tiempos(int arreglo[5][5]){
     int i, j;
