@@ -87,6 +87,10 @@ int main(void){
         {
             if (mensaje->cant_topos == -1){
                 //mandar mensaje a hijo 2 para hacer break, se acabó el juego
+                close(p_h1[0]);         //cerramos lectura de hijo 1 con padre
+                mensaje->cant_topos = -1;
+                write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);        //mandamos mensaje a hijo 2 para que termine 
+                close(h1_h2[1]);        //cerramos escritura hijo 1 a hijo 2
                 break;
             }
             else if(mensaje->cant_topos > -1){
@@ -94,7 +98,7 @@ int main(void){
                 //mandar mensaje a hijo 2 de hacer su pega, con el struct de mensaje
                 printf("Estoy en el hijo 1\n");
                 sleep(1);
-                write(h1_h2[1], mensaje, sizeof(informacion_topos));
+                write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
             }
         }
         
@@ -114,15 +118,24 @@ int main(void){
             close(h2_h3[0]);       //cerramos lectura del hijo 2 a hijo 3
             close(h1_h2[1]);         //cerramos escritura de hijo 2 a hijo 1
             pid_h2 = getpid();      //almaceno pid hijo 2
-            /*while(0 < (num = read(h1_h2[0], mensaje, sizeof(informacion_topos)))){
-                printf("cantidad topos: %d\n", mensaje->cant_topos);
-            }*/
-            read(h1_h2[0], mensaje, sizeof(informacion_topos));
-            printf("Estoy en hijo 2\n");
-            sleep(1);
-            mensaje->cant_topos = 1;
-            num = write(h2_h3[1], mensaje, sizeof(informacion_topos));
-            printf("%d\n", num);
+            while(0 < (num = read(h1_h2[0], mensaje, sizeof(informacion_topos)))){
+                if (mensaje->cant_topos == -1){
+                //mandar mensaje a hijo 3 para hacer break, se acabó el juego
+                close(h1_h2[0]);         //cerramos lectura de hijo 2 con hijo 1
+                mensaje->cant_topos = -1;
+                write(h2_h3[1], mensaje, sizeof(informacion_topos) + 1);        //mandamos mensaje a hijo 3 para que termine 
+                close(h2_h3[1]);        //cerramos escritura hijo 2 a hijo 3
+                break;
+                }
+                else if(mensaje->cant_topos > -1){
+                     //calcular timepos de los topos a salir de 0-3
+                    //mandar mensaje a hijo 3 de hacer su pega, con el struct de mensaje
+                    printf("Estoy en el hijo 1\n");
+                    sleep(1);
+                    write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
+                }
+            }
+            
             break;
         
         case -1:
@@ -136,14 +149,21 @@ int main(void){
                 close(h3_p[0]);     //cerramos lectura de hijo 3 a padre
                 close(h2_h3[1]);    //cerramos escritura de hijo 3 a hijo 2
 
-                read(h2_h3[0], mensaje, sizeof(informacion_topos));
-                printf("Estoy en hijo 3\n");
-                sleep(1);
-                mensaje->cant_topos = 2;
-                num = write(h3_p[1], mensaje, sizeof(informacion_topos));       //no escribe en el pipe, nose porque 
-                printf("%d\n", num);
-                printf("Mande mensaje hijo 3\n");
-                sleep(1);
+                while(0 < (num = read(h2_h3[0], mensaje, sizeof(informacion_topos)))){
+                    if (mensaje->cant_topos == -1){
+                    
+                    close(h2_h3[0]);         //cerramos lectura de hijo 3 con hijo 2
+                    close(h3_p[1]);        //cerramos escritura hijo 3 a padre
+                    break;
+                    }
+                    else if(mensaje->cant_topos > -1){
+                        //calcular timepos de los topos a salir de 0-3
+                        //mandar mensaje a hijo 3 de hacer su pega, con el struct de mensaje
+                        printf("Estoy en el hijo 1\n");
+                        sleep(1);
+                        write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
+                    }
+                }
                 break;
             case -1:
                 //no funciona 
@@ -199,7 +219,7 @@ int main(void){
                     if(opcion==1 || opcion==2){
                         
                         mensaje->cant_topos = 1;
-                        write(p_h1[1], mensaje, sizeof(informacion_topos)); //ver esto
+                        write(p_h1[1], mensaje, sizeof(informacion_topos) + 1); //ver esto
                         num = read(h3_p[0], mensaje, sizeof(informacion_topos));
                         printf("%d\n", num);
                         printf("Volvimos al padre\n");
@@ -230,7 +250,9 @@ int main(void){
                 break;
             case 2:     //salir del juego 
                 mensaje->cant_topos = -1;
-                write(p_h1[1], mensaje,sizeof(informacion_topos));
+                write(p_h1[1], mensaje,sizeof(informacion_topos) + 1);
+                sleep(2);
+                close(p_h1[1]);     //cerramos escritura de padre a hijo 1
                 exit(1);
             
             default:    //numero ingresado invalido, se vuelve a mostrar el menú
