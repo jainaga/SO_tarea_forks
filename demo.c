@@ -72,7 +72,7 @@ void golpear_topo(int arreglo[5][5], int x, int y){
 int main(void){
     int p_h1[2], h1_h2[2], h2_h3[2], h3_p[2];       //pipes
     int num;
-    pid_t pid_p, pid_h1, pid_h2, pid_h3, pid;            //pids
+    pid_t pid_p, pid;            //pids
 
     informacion_topos* mensaje;
     mensaje = (informacion_topos*)malloc(sizeof(informacion_topos));
@@ -89,15 +89,14 @@ int main(void){
     case 0:         //hijo 1
         close(h1_h2[0]);       //cerramos lectura del hijo 1 a hijo 2
         close(p_h1[1]);         //cerramos escritura de hijo 1 a padre
-        pid_h1 = getpid();      //almaceno pid hijo 1
         while (0 < (num = read(p_h1[0], mensaje , sizeof(informacion_topos))))
         {
-            printf("Entre a hijo 1\n");
+            
             if (mensaje->cant_topos == -1){
                 //mandar mensaje a hijo 2 para hacer break, se acabó el juego
                 close(p_h1[0]);         //cerramos lectura de hijo 1 con padre
                 mensaje->cant_topos = -1;
-                write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);        //mandamos mensaje a hijo 2 para que termine 
+                write(h1_h2[1], mensaje, sizeof(informacion_topos));        //mandamos mensaje a hijo 2 para que termine 
                 close(h1_h2[1]);        //cerramos escritura hijo 1 a hijo 2
                 break;
             }
@@ -105,18 +104,17 @@ int main(void){
                 //calcular cantidad de topos a salir de 0-3
                 //mandar mensaje a hijo 2 de hacer su pega, con el struct de mensaje
                 mensaje->cant_topos = (rand() % 4);     //se genera el numero de topos a salir con random de 0 a 3 
-                write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
+                write(h1_h2[1], mensaje, sizeof(informacion_topos));
             }
         }
         
         break;
     
     case -1:
-        /*no funciona*/
+        /*no funciona el fork*/
     
     default:     //padre
         //printf("%d, y el del padre %d\n", pid, getpid());
-        close(h3_p[1]);     //cerramos escritura de padre a hijo 3
         close(p_h1[0]);     //cerramos lectura de padre a hijo 1
         pid_p = getpid();   //almaceno pid padre
         switch (pid = fork())
@@ -124,17 +122,16 @@ int main(void){
         case 0:         //hijo 2
             close(h2_h3[0]);       //cerramos lectura del hijo 2 a hijo 3
             close(h1_h2[1]);         //cerramos escritura de hijo 2 a hijo 1
-            pid_h2 = getpid();      //almaceno pid hijo 2
 
             int z;                  //contador de para el for 
             while(0 < (num = read(h1_h2[0], mensaje, sizeof(informacion_topos)))){
-                printf("Entre a hijo 2\n");
+                
 
                 if (mensaje->cant_topos == -1){
                 //mandar mensaje a hijo 3 para hacer break, se acabó el juego
                 close(h1_h2[0]);         //cerramos lectura de hijo 2 con hijo 1
                 mensaje->cant_topos = -1;
-                write(h2_h3[1], mensaje, sizeof(informacion_topos) + 1);        //mandamos mensaje a hijo 3 para que termine 
+                write(h2_h3[1], mensaje, sizeof(informacion_topos));        //mandamos mensaje a hijo 3 para que termine 
                 close(h2_h3[1]);        //cerramos escritura hijo 2 a hijo 3
                 break;
                 }
@@ -144,33 +141,32 @@ int main(void){
                     for (z=0; z<mensaje->cant_topos; z++){
                         mensaje->tiempo_topos[z] = (rand() % 4);
                     }
-                    sleep(1);
-                    write(h2_h3[1], mensaje, sizeof(informacion_topos) + 1);        //se manda mensaje con los tiempos de vida de los topos
+                    sleep(0.5);
+                    write(h2_h3[1], mensaje, sizeof(informacion_topos));        //se manda mensaje con los tiempos de vida de los topos
                 }
             }
             
             break;
         
         case -1:
-            /*no funciona*/
+            /*no funciona el fork*/
         
         default:     //padre
             switch (pid = fork())
             {
             case 0:     //hijo 3
-                pid_h3 = getpid();
                 close(h3_p[0]);     //cerramos lectura de hijo 3 a padre
                 close(h2_h3[1]);    //cerramos escritura de hijo 3 a hijo 2
                 int z;
 
                 while(0 < (num = read(h2_h3[0], mensaje, sizeof(informacion_topos)))){
-                    printf("Entre a hijo 3\n");
+                    
 
                     if (mensaje->cant_topos == -1){
                     
-                    close(h2_h3[0]);         //cerramos lectura de hijo 3 con hijo 2
-                    close(h3_p[1]);        //cerramos escritura hijo 3 a padre
-                    break;
+                        close(h2_h3[0]);         //cerramos lectura de hijo 3 con hijo 2
+                        close(h3_p[1]);        //cerramos escritura hijo 3 a padre
+                        break;
                     }
                     else if(mensaje->cant_topos > -1){
                         //calcular coordenadas de los topos a salir dentro del tablero
@@ -180,16 +176,17 @@ int main(void){
                             mensaje->coordenadas_topos[(z*2)+1] = (rand() % 5); //coordenadas y
                         }
                         
-                        write(h3_p[1], mensaje, sizeof(informacion_topos) + 1); //mensaje al padre con las informacion de los topos
+                        write(h3_p[1], mensaje, sizeof(informacion_topos)); //mensaje al padre con las informacion de los topos
                     }
                 }
                 break;
             case -1:
-                //no funciona 
+                //no funciona el fork
                 break;
             
             default:        //padre
-                sleep(1);
+                close(h3_p[1]);     //cerramos escritura de padre a hijo 3
+                sleep(0.5);
                 break;
             }
             break;
@@ -226,12 +223,13 @@ int main(void){
                         inicializacion_matriz_tiempos(arreglo_tiempos);
                         int m;      //contador de for
                         int coor_x, coor_y;
+                        int salida;
 
                         /*falta hacer el while*/
                         while (1)
                         {
                             mensaje->cant_topos = 0;        //mensaje para que hijo 1 empiece su trabajo
-                            write(p_h1[1], mensaje, sizeof(informacion_topos) + 1);
+                            write(p_h1[1], mensaje, sizeof(informacion_topos));
                             read(h3_p[0], mensaje, sizeof(informacion_topos));
 
                             
@@ -255,13 +253,18 @@ int main(void){
                                 printf("Ingrese coordenada de y\n");
                                 scanf("%d", &coor_y);
                                 golpear_topo(arreglo_tiempos, coor_x, coor_y);
-                            }else if(opcion==0){
+                            }else if(opcion==2){
                                 //el golpe es aleatorio
                                 coor_x = (rand() % 5);
-                                coor_x = (rand() % 5);
+                                coor_y = (rand() % 5);
                                 golpear_topo(arreglo_tiempos, coor_x, coor_y);
                                 printf("Se golpeó en las coordenadas %d, %d\n", coor_x, coor_y);
-                                sleep(2);
+                                printf("Ingresa un número para continuar o ingrese 0 para salir\n");
+                                scanf("%d", &salida);
+                                if (salida == 0){
+                                    break;
+                                }
+                                sleep(0.5);
                             }
                             //restar vida a topos 
                             restar_vida_topos(arreglo_tiempos);
@@ -274,7 +277,7 @@ int main(void){
                     }
                     else{
                         printf("Ingresa un número válido\n\n\n");   //ingreso numero invalido, se mostrara nuevamente el menu de modo de juego
-                        sleep(2);
+                        sleep(0.5);
                     }
                 }
                 
@@ -282,7 +285,7 @@ int main(void){
                 break;
             case 2:     //salir del juego 
                 mensaje->cant_topos = -1;
-                write(p_h1[1], mensaje,sizeof(informacion_topos) + 1);
+                write(p_h1[1], mensaje,sizeof(informacion_topos));
                 sleep(2);
                 close(p_h1[1]);     //cerramos escritura de padre a hijo 1
                 printf("Hasta otra\n");
@@ -290,7 +293,7 @@ int main(void){
             
             default:    //numero ingresado invalido, se vuelve a mostrar el menú
                 printf("Ingresa un número válido\n\n\n");
-                sleep(2);
+                sleep(1);
                 break;
             }
 
