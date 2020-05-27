@@ -236,7 +236,10 @@ int main(void){
                             if (mensaje->cant_topos>0){
                                 //se hace la pega, de otra manera no se modifica la matriz
                                 for(m=0; m<mensaje->cant_topos; m++){
-                                    agregar_topo(arreglo_tiempos, mensaje->coordenadas_topos[2*m], mensaje->coordenadas_topos[(2*m)+1], mensaje->tiempo_topos[m]);
+                                    if(arreglo_tiempos[mensaje->coordenadas_topos[(2*m)+1]][mensaje->coordenadas_topos[2*m]] == 0){     //se revisa si el topo puede salir es la posicion asignada
+                                        agregar_topo(arreglo_tiempos, mensaje->coordenadas_topos[2*m], mensaje->coordenadas_topos[(2*m)+1], mensaje->tiempo_topos[m]);
+                                    }
+                                    
                                 }
                             }
                             //se muestra la matriz con los topos
@@ -288,6 +291,7 @@ int main(void){
                 write(p_h1[1], mensaje,sizeof(informacion_topos));
                 sleep(2);
                 close(p_h1[1]);     //cerramos escritura de padre a hijo 1
+                free(mensaje);
                 printf("Hasta otra\n");
                 exit(1);
             
@@ -299,6 +303,7 @@ int main(void){
 
         }
     }
+    free(mensaje);
 
     return 0;
 }
