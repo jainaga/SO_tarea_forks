@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h> 
 
 
 typedef struct informacion_topos {      //estrucura que almacena la informacion de los nuevos topos
@@ -60,6 +61,10 @@ void restar_vida_topos(int arreglo[5][5]){
     }
 }
 
+void agregar_topo(int arreglo[5][5], int x, int y, int tiempo){
+    arreglo[y][x] = tiempo;
+}
+
 void golpear_topo(int arreglo[5][5], int x, int y){
     arreglo[y][x] = 0;
 }
@@ -77,6 +82,8 @@ int main(void){
     pipe(h2_h3);
     pipe(h3_p);
 
+    srand(time(0));
+
     switch (pid = fork())       //creacion de hijos 1, 2 y 3
     {
     case 0:         //hijo 1
@@ -85,6 +92,7 @@ int main(void){
         pid_h1 = getpid();      //almaceno pid hijo 1
         while (0 < (num = read(p_h1[0], mensaje , sizeof(informacion_topos))))
         {
+            printf("Entre a hijo 1\n");
             if (mensaje->cant_topos == -1){
                 //mandar mensaje a hijo 2 para hacer break, se acabó el juego
                 close(p_h1[0]);         //cerramos lectura de hijo 1 con padre
@@ -96,8 +104,7 @@ int main(void){
             else if(mensaje->cant_topos > -1){
                 //calcular cantidad de topos a salir de 0-3
                 //mandar mensaje a hijo 2 de hacer su pega, con el struct de mensaje
-                printf("Estoy en el hijo 1\n");
-                sleep(1);
+                mensaje->cant_topos = (rand() % 4);     //se genera el numero de topos a salir con random de 0 a 3 
                 write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
             }
         }
@@ -118,7 +125,11 @@ int main(void){
             close(h2_h3[0]);       //cerramos lectura del hijo 2 a hijo 3
             close(h1_h2[1]);         //cerramos escritura de hijo 2 a hijo 1
             pid_h2 = getpid();      //almaceno pid hijo 2
+
+            int z;                  //contador de para el for 
             while(0 < (num = read(h1_h2[0], mensaje, sizeof(informacion_topos)))){
+                printf("Entre a hijo 2\n");
+
                 if (mensaje->cant_topos == -1){
                 //mandar mensaje a hijo 3 para hacer break, se acabó el juego
                 close(h1_h2[0]);         //cerramos lectura de hijo 2 con hijo 1
@@ -128,11 +139,13 @@ int main(void){
                 break;
                 }
                 else if(mensaje->cant_topos > -1){
-                     //calcular timepos de los topos a salir de 0-3
+                    //calcular timepos de los topos a salir de 0-3
                     //mandar mensaje a hijo 3 de hacer su pega, con el struct de mensaje
-                    printf("Estoy en el hijo 1\n");
+                    for (z=0; z<mensaje->cant_topos; z++){
+                        mensaje->tiempo_topos[z] = (rand() % 4);
+                    }
                     sleep(1);
-                    write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
+                    write(h2_h3[1], mensaje, sizeof(informacion_topos) + 1);        //se manda mensaje con los tiempos de vida de los topos
                 }
             }
             
@@ -148,8 +161,11 @@ int main(void){
                 pid_h3 = getpid();
                 close(h3_p[0]);     //cerramos lectura de hijo 3 a padre
                 close(h2_h3[1]);    //cerramos escritura de hijo 3 a hijo 2
+                int z;
 
                 while(0 < (num = read(h2_h3[0], mensaje, sizeof(informacion_topos)))){
+                    printf("Entre a hijo 3\n");
+
                     if (mensaje->cant_topos == -1){
                     
                     close(h2_h3[0]);         //cerramos lectura de hijo 3 con hijo 2
@@ -157,11 +173,14 @@ int main(void){
                     break;
                     }
                     else if(mensaje->cant_topos > -1){
-                        //calcular timepos de los topos a salir de 0-3
-                        //mandar mensaje a hijo 3 de hacer su pega, con el struct de mensaje
-                        printf("Estoy en el hijo 1\n");
-                        sleep(1);
-                        write(h1_h2[1], mensaje, sizeof(informacion_topos) + 1);
+                        //calcular coordenadas de los topos a salir dentro del tablero
+                        //mandar mensaje a padre de hacer su pega, con el struct de mensaje
+                        for(z=0; z<mensaje->cant_topos; z++){
+                            mensaje->coordenadas_topos[z*2] = (rand() % 5);     //coordenadas x
+                            mensaje->coordenadas_topos[(z*2)+1] = (rand() % 5); //coordenadas y
+                        }
+                        
+                        write(h3_p[1], mensaje, sizeof(informacion_topos) + 1); //mensaje al padre con las informacion de los topos
                     }
                 }
                 break;
@@ -179,21 +198,7 @@ int main(void){
         break;
     }
 
-    //creacion de matriz de tiempo de los topos solo para el padre
-    //int i, j;
-    if (getpid() == pid_p){
-        int arreglo_tiempos[5][5];      //arreglo de 5x5 que almacena el estado de cada celda del tablero con tiempos de cada topo 
-        inicializacion_matriz_tiempos(arreglo_tiempos);
-        arreglo_tiempos[2][3] = 5;
-        lectura_matriz_tiempos(arreglo_tiempos);
-        mostrar_topos(arreglo_tiempos);
-        restar_vida_topos(arreglo_tiempos);
-        lectura_matriz_tiempos(arreglo_tiempos);
-        golpear_topo(arreglo_tiempos, 3, 2);
-        mostrar_topos(arreglo_tiempos);
-        lectura_matriz_tiempos(arreglo_tiempos);
-    }
-    printf("buena soy el proceso %d\n", getpid());
+    
 
     //aqui empieza el juego 
 
@@ -217,25 +222,52 @@ int main(void){
                     printf("Elige un modo de juego y enter para continuar\n");
                     scanf("%d", &opcion);
                     if(opcion==1 || opcion==2){
+                        int arreglo_tiempos[5][5];      //arreglo de 5x5 que almacena el estado de cada celda del tablero con tiempos de cada topo 
+                        inicializacion_matriz_tiempos(arreglo_tiempos);
+                        int m;      //contador de for
+                        int coor_x, coor_y;
+
+                        /*falta hacer el while*/
+                        while (1)
+                        {
+                            mensaje->cant_topos = 0;        //mensaje para que hijo 1 empiece su trabajo
+                            write(p_h1[1], mensaje, sizeof(informacion_topos) + 1);
+                            read(h3_p[0], mensaje, sizeof(informacion_topos));
+
+                            
+                            if (mensaje->cant_topos>0){
+                                //se hace la pega, de otra manera no se modifica la matriz
+                                for(m=0; m<mensaje->cant_topos; m++){
+                                    agregar_topo(arreglo_tiempos, mensaje->coordenadas_topos[2*m], mensaje->coordenadas_topos[(2*m)+1], mensaje->tiempo_topos[m]);
+                                }
+                            }
+                            //se muestra la matriz con los topos
+                            mostrar_topos(arreglo_tiempos);
+
+                            //se analiza opcion de juego para ver la accion
+                            if(opcion==1){
+                                //se pide por pantalla golpe
+                                printf("Ingresa coordena de x o -1 para salir\n");
+                                scanf("%d", &coor_x);
+                                if(coor_x == -1){
+                                    break;
+                                }
+                                printf("Ingrese coordenada de y\n");
+                                scanf("%d", &coor_y);
+                                golpear_topo(arreglo_tiempos, coor_x, coor_y);
+                            }else if(opcion==0){
+                                //el golpe es aleatorio
+                                coor_x = (rand() % 5);
+                                coor_x = (rand() % 5);
+                                golpear_topo(arreglo_tiempos, coor_x, coor_y);
+                                printf("Se golpeó en las coordenadas %d, %d\n", coor_x, coor_y);
+                                sleep(2);
+                            }
+                            //restar vida a topos 
+                            restar_vida_topos(arreglo_tiempos);
+                        }
                         
-                        mensaje->cant_topos = 1;
-                        write(p_h1[1], mensaje, sizeof(informacion_topos) + 1); //ver esto
-                        num = read(h3_p[0], mensaje, sizeof(informacion_topos));
-                        printf("%d\n", num);
-                        printf("Volvimos al padre\n");
-                        //juega, y se toma encuenta el modo de juego
 
-
-                        //aqui se comunica el padre con el hijo 1
-                        //padre espera a sus hijos hagan lo que tengan que hacer 
-                        //y le el mensaje del hijo 3
-
-                        //funcion descifrar_mensaje, este descifra el mensaje de hijo 3 y modifica la matriz
-
-                        //print de la matriz con topos 
-                        //se golpea
-                        //se resta uno a la matriz de tiempo 
-                        //vuelve todo a pasar 
                     }
                     else if(opcion == 3){   //vuelve al menu principal
                         break;
@@ -253,6 +285,7 @@ int main(void){
                 write(p_h1[1], mensaje,sizeof(informacion_topos) + 1);
                 sleep(2);
                 close(p_h1[1]);     //cerramos escritura de padre a hijo 1
+                printf("Hasta otra\n");
                 exit(1);
             
             default:    //numero ingresado invalido, se vuelve a mostrar el menú
