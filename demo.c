@@ -249,12 +249,32 @@ int main(void){
                             if(opcion==1){
                                 //se pide por pantalla golpe
                                 printf("Ingresa coordena de x o -1 para salir\n");
-                                scanf("%d", &coor_x);
+                                while (1)
+                                {
+                                    scanf("%d", &coor_x);
+                                    if((coor_x>-2) && (coor_x<5)){
+                                        break;
+                                    }
+                                    else{
+                                        printf("Ingrese opción válida\n");
+                                    }
+                                }
+                                
                                 if(coor_x == -1){
                                     break;
                                 }
                                 printf("Ingrese coordenada de y\n");
-                                scanf("%d", &coor_y);
+                                while (1)
+                                {
+                                    scanf("%d", &coor_y);
+                                    if((coor_y>-2) && (coor_y<5)){
+                                        break;
+                                    }
+                                    else{
+                                        printf("Ingrese opción válida\n");
+                                    }
+                                }
+                                
                                 golpear_topo(arreglo_tiempos, coor_x, coor_y);
                             }else if(opcion==2){
                                 //el golpe es aleatorio
