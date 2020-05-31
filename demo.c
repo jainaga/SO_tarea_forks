@@ -50,7 +50,7 @@ void mostrar_topos(int arreglo[5][5]){      //imprime la matriz de los topos
     printf("   0    1    2    3    4 \n");
 }
 
-void restar_vida_topos(int arreglo[5][5]){
+void restar_vida_topos(int arreglo[5][5]){      //se resta uno de vida a cada topo
     int i, j;
     for (i=0;i<5;i++){  
         for(j=0;j<5;j++){
@@ -61,11 +61,11 @@ void restar_vida_topos(int arreglo[5][5]){
     }
 }
 
-void agregar_topo(int arreglo[5][5], int x, int y, int tiempo){
+void agregar_topo(int arreglo[5][5], int x, int y, int tiempo){     //se agrega tiempo de vida del topo en la ubicación asignada de la matriz de tiempo
     arreglo[y][x] = tiempo;
 }
 
-void golpear_topo(int arreglo[5][5], int x, int y){
+void golpear_topo(int arreglo[5][5], int x, int y){             //se iguala a cero el lugar de la matriz de tiempo en donde estaba el topo golpeado
     arreglo[y][x] = 0;
 }
 
@@ -112,6 +112,7 @@ int main(void){
     
     case -1:
         /*no funciona el fork*/
+        exit(1);
     
     default:     //padre
         //printf("%d, y el del padre %d\n", pid, getpid());
@@ -150,6 +151,7 @@ int main(void){
         
         case -1:
             /*no funciona el fork*/
+            exit(1);
         
         default:     //padre
             switch (pid = fork())
@@ -182,7 +184,7 @@ int main(void){
                 break;
             case -1:
                 //no funciona el fork
-                break;
+                exit(1);
             
             default:        //padre
                 close(h3_p[1]);     //cerramos escritura de padre a hijo 3
@@ -199,7 +201,7 @@ int main(void){
 
     //aqui empieza el juego 
 
-    if (getpid() == pid_p){
+    if (getpid() == pid_p){         //se revisa el pid del proceso para que solo el padre entre al if, ya que este maneja el juego
         while(1){
             int opcion;
             printf("Bienvenido a Golpéa el Topo\n\n\n");
@@ -225,7 +227,7 @@ int main(void){
                         int coor_x, coor_y;
                         int salida;
 
-                        /*falta hacer el while*/
+                        
                         while (1)
                         {
                             mensaje->cant_topos = 0;        //mensaje para que hijo 1 empiece su trabajo
