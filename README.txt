@@ -7,11 +7,11 @@ Instrucciones para el uso de la tarea:
 2.- Abrir en terminal la ubicación de la carpeta con los archivos de la tarea.
     En la carpeta se encontraran los siguientes archivos:
 
-	TAREA2_201773529-5.c: Codigo donde se encuentra la funcion inicializacion_matriz_tiempos, lectura_matriz_tiempos, mostrar_topos, restar_vida_topos, agregar_topo, golpear_topo y main
+	TAREA2_201773529-5.c: Codigo donde se encuentra la funcion inicializacion_matriz_tiempos, lectura_matriz_tiempos, mostrar_topos, restar_vida_topos, agregar_topo, golpear_topo y main.
 	makefile: Archivo con reglas de compilación.
 	README.txt: Archivo con instrucciones de uso de la Tarea 2.
 
-4.- En la terminal realizar los siguientes comandos para compilar el archivo:
+3.- En la terminal realizar los siguientes comandos para compilar el archivo:
 
 	En terminal escribir comando:
 
