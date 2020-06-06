@@ -53,3 +53,5 @@ dkms.conf
 
 # Visual
 .vscode/
+
+*.tar.gz
