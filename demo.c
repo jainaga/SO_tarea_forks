@@ -89,6 +89,10 @@ int main(void){
     case 0:         //hijo 1
         close(h1_h2[0]);       //cerramos lectura del hijo 1 a hijo 2
         close(p_h1[1]);         //cerramos escritura de hijo 1 a padre
+        close(h2_h3[0]);        //cerramos las pipes que no usara este proceso 
+        close(h2_h3[1]);
+        close(h3_p[0]);
+        close(h3_p[1]);
         while (0 < (num = read(p_h1[0], mensaje , sizeof(informacion_topos))))
         {
             
@@ -123,6 +127,9 @@ int main(void){
         case 0:         //hijo 2
             close(h2_h3[0]);       //cerramos lectura del hijo 2 a hijo 3
             close(h1_h2[1]);         //cerramos escritura de hijo 2 a hijo 1
+            close(p_h1[1]);
+            close(h3_p[0]);
+            close(h3_p[1]);
 
             int z;                  //contador de para el for 
             while(0 < (num = read(h1_h2[0], mensaje, sizeof(informacion_topos)))){
@@ -159,6 +166,9 @@ int main(void){
             case 0:     //hijo 3
                 close(h3_p[0]);     //cerramos lectura de hijo 3 a padre
                 close(h2_h3[1]);    //cerramos escritura de hijo 3 a hijo 2
+                close(p_h1[1]);
+                close(h1_h2[0]);
+                close(h1_h2[1]);
                 int z;
 
                 while(0 < (num = read(h2_h3[0], mensaje, sizeof(informacion_topos)))){
@@ -313,6 +323,11 @@ int main(void){
                 write(p_h1[1], mensaje,sizeof(informacion_topos));
                 sleep(2);
                 close(p_h1[1]);     //cerramos escritura de padre a hijo 1
+                close(h3_p[0]);
+                close(h1_h2[0]);
+                close(h1_h2[1]);
+                close(h2_h3[1]);
+                close(h2_h3[0]);
                 free(mensaje);
                 printf("Hasta otra\n");
                 exit(1);
